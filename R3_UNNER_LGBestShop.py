@@ -146,22 +146,19 @@ def getHTMLFromUrl(url, where, fileName):
 
 	CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
 	GOOGLE_CHROME_BIN = "/app/.apt/usr/bin/google-chrome"
-	print("00")
 	chrome_options = Options()
 	chrome_options.add_argument("--headless")
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
-	chrome_options.binary_location = GOOGLE_CHROME_BIN
-	print("A0: ", CHROMEDRIVER_PATH)
-	print("A1: ", GOOGLE_CHROME_BIN)
 
+	chrome_options.binary_location = GOOGLE_CHROME_BIN
 	driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
-	print("PASS!!")
+
+	# driver = webdriver.Chrome(options=chrome_options)
 
 	driver.get(url)
 	html = driver.page_source
-	print("AA: ", html)
-	time.sleep(3)
+	time.sleep(0.5)
 
 	if ("검색결과가 없습니다." in html):
 		path = OUTPUT_PATH + '/결과없음_' + fileName
