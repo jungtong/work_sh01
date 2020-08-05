@@ -27,8 +27,6 @@ import requests # pip3 install requests
 # reload(sys)  
 # sys.setdefaultencoding('utf-8')
 
-GOOGLE_CHROME_BIN="/app/.apt/usr/bin/google_chrome"
-
 keywords = [
 'BESTSHOP',
 # 'LG교원',
@@ -150,8 +148,8 @@ def getHTMLFromUrl(url, where, fileName):
 	chrome_options.add_argument("--headless")
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
-	print("A0: ")
-	driver = webdriver.Chrome(executable_path=GOOGLE_CHROME_BIN, options=chrome_options)
+	print("A0: ", DIR_PATH)
+	driver = webdriver.Chrome(executable_path=DIR_PATH+'/chromedriver', options=chrome_options)
 	print("AA: ")
 
 	driver.get(url)
