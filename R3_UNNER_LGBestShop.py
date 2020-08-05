@@ -156,13 +156,13 @@ def getHTMLFromUrl(url, where, fileName):
 
 	if ("검색결과가 없습니다." in html):
 		path = OUTPUT_PATH + '/결과없음_' + fileName
-		# print("		screenShot: " + path)
+		print("		screenShot: " + path)
 		driver.save_screenshot(path)
 	else:
 		xpathString = "//div[@class='"+ convertDIVNameForQuery(where) + "']"
 		div = driver.find_element_by_xpath(xpathString)
 		path = OUTPUT_PATH + '/' + fileName
-		# print("		screenShot: " + path)
+		print("		screenShot: " + path)
 		div.screenshot(path)
 	
 	driver.quit()
@@ -205,7 +205,6 @@ def DoWork():
 	tDateTime = today.strftime('%y%m%d')
 	sendTelegramMessage("[LGBestShop] CAPTURE START : " + yDateTime + " ~ " + tDateTime + "\n")
 
-
 	allResult = {}
 	count = 0
 	fullCount = len(keywords) * len(wheres) * len(pages)
@@ -227,6 +226,8 @@ def DoWork():
 				targetInfo['keyword'] = keyword
 				targetInfo['page'] = page
 				targetItems.append(targetInfo)
+
+	pprint(targetItems)
 
 	pool = Pool(4)
 	crawlData = pool.map(implWorkWithItem, targetItems)
