@@ -24,6 +24,8 @@ from httplib2 import Http
 from oauth2client import file, client, tools # pip3 install oauth2client
 import requests # pip3 install requests
 
+GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
+CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
 
 # reload(sys)  
 # sys.setdefaultencoding('utf-8')
@@ -148,7 +150,9 @@ def getHTMLFromUrl(url, where, fileName):
 	chrome_options.add_argument("--headless")
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
-	driver = webdriver.Chrome(executable_path=DIR_PATH+'/chromedriver', options=chrome_options)
+	chrome_options.binary_location(GOOGLE_CHROME_PATH)
+	print("A0: ", CHROMEDRIVER_PATH)
+	driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
 	print("AA: ", driver)
 
 	driver.get(url)
