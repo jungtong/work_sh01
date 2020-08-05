@@ -145,7 +145,7 @@ def convertDIVNameForQuery(inputStr):
 def getHTMLFromUrl(url, where, fileName):
 
 	CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
-	GOOGLE_CHROME_BIN: "/app/.apt/usr/bin/google-chrome"
+	GOOGLE_CHROME_BIN = "/app/.apt/usr/bin/google-chrome"
 	print("00")
 	chrome_options = Options()
 	chrome_options.add_argument("--headless")
