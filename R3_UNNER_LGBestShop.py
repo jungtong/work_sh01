@@ -190,7 +190,7 @@ def implWorkWithItem(item):
 			result = True
 		except Exception as err:
 			time.sleep(1)
-			# print(err)
+			print(err)
 			pass
 
 	if ("검색결과가 없습니다." in html):
