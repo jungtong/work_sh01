@@ -151,7 +151,7 @@ def getHTMLFromUrl(url, where, fileName):
 	chrome_options.add_argument("--headless")
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
-	chrome_options.setBinary(GOOGLE_CHROME_BIN)
+	chrome_options.binary_location = GOOGLE_CHROME_BIN
 	print("A0: ", CHROMEDRIVER_PATH)
 	print("A1: ", GOOGLE_CHROME_BIN)
 
