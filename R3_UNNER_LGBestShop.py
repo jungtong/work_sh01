@@ -97,7 +97,7 @@ TELEGRAM_TOKEN = "bot911043358:AAGTh-AdcbFkofmkQ0gLaXajOBoDMgbcCmQ"
 TELEGRAM_CHAT_ID = "-1001388503761"
 def sendTelegramMessage(pushMessage):
 	print("🌈 TEST" + pushMessage)
-	requests.post("https://api.telegram.org/" + TELEGRAM_TOKEN + "/sendMessage?chat_id=" + TELEGRAM_CHAT_ID + "&text=" + pushMessage)
+	# requests.post("https://api.telegram.org/" + TELEGRAM_TOKEN + "/sendMessage?chat_id=" + TELEGRAM_CHAT_ID + "&text=" + pushMessage)
 ###################
 
 
@@ -149,9 +149,11 @@ def getHTMLFromUrl(url, where, fileName):
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
 	driver = webdriver.Chrome(executable_path=DIR_PATH+'/chromedriver', options=chrome_options)
+	print("AA: ", driver)
 
 	driver.get(url)
 	html = driver.page_source
+	print("AA: ", html)
 	time.sleep(3)
 
 	if ("검색결과가 없습니다." in html):
