@@ -149,12 +149,13 @@ def getHTMLFromUrl(url, where, fileName):
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
 
-	CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
-	GOOGLE_CHROME_BIN = "/app/.apt/usr/bin/google-chrome"
-	chrome_options.binary_location = GOOGLE_CHROME_BIN
-	driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
-
-	# driver = webdriver.Chrome(options=chrome_options)
+	if 'GOOGLE_CHROME_SHIM' in os.environ: 
+		CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
+		GOOGLE_CHROME_BIN = "/app/.apt/usr/bin/google-chrome"
+		chrome_options.binary_location = GOOGLE_CHROME_BIN
+		driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
+	else:
+		driver = webdriver.Chrome(options=chrome_options)
 
 	driver.get(url)
 	html = driver.page_source

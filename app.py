@@ -20,7 +20,7 @@ def hello_world():
 	toDate = request.args.get('toDate')
 
 	if fromDate != None and toDate != None:
-		q = Queue(connection=conn, default_timeout=1800)
+		q = Queue(connection=conn, default_timeout=700)
 		result = q.enqueue(r3unner_main, args=(fromDate, toDate))
 
 	return render_template("index.html")
