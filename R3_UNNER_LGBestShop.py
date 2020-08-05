@@ -96,7 +96,7 @@ TELEGRAM_TOKEN = "bot911043358:AAGTh-AdcbFkofmkQ0gLaXajOBoDMgbcCmQ"
 TELEGRAM_CHAT_ID = "-1001388503761"
 def sendTelegramMessage(pushMessage):
 	print("🌈 TEST" + pushMessage)
-	# requests.post("https://api.telegram.org/" + TELEGRAM_TOKEN + "/sendMessage?chat_id=" + TELEGRAM_CHAT_ID + "&text=" + pushMessage)
+	requests.post("https://api.telegram.org/" + TELEGRAM_TOKEN + "/sendMessage?chat_id=" + TELEGRAM_CHAT_ID + "&text=" + pushMessage)
 ###################
 
 
