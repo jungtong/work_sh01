@@ -89,6 +89,12 @@ heroku buildpacks:add heroku/python -a worksh01
 heroku buildpacks:add --index 1 https://github.com/heroku/heroku-buildpack-google-chrome.git -a worksh01
 heroku buildpacks:add --index 2 https://github.com/heroku/heroku-buildpack-chromedriver -a worksh01
 
+~~~
+CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
+GOOGLE_CHROME_BIN = "/app/.apt/usr/bin/google-chrome"
+chrome_options.binary_location = GOOGLE_CHROME_BIN
+driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
+~~~
 
 #### [https://devcenter.heroku.com/articles/getting-started-with-python#set-up](https://devcenter.heroku.com/articles/getting-started-with-python#set-up)
 

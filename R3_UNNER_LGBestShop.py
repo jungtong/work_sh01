@@ -29,9 +29,9 @@ import requests # pip3 install requests
 
 keywords = [
 'BESTSHOP',
-# 'LG교원',
-# 'LG매장',
-# 'LG멤버십',
+'LG교원',
+'LG매장',
+'LG멤버십',
 # 'LG박람회',
 # 'LG혼수',
 # '베스트라이프',
@@ -44,15 +44,15 @@ keywords = [
 
 wheres = [
 '블로그',
-# '카페',
-# '뉴스',
-# '웹페이지'
+'카페',
+'뉴스',
+'웹페이지'
 ]
 
 pages = [
 '1',
-# '2',
-# '3'
+'2',
+'3'
 ]
 
 skipHrefs = [
@@ -144,13 +144,13 @@ def convertDIVNameForQuery(inputStr):
 
 def getHTMLFromUrl(url, where, fileName):
 
-	CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
-	GOOGLE_CHROME_BIN = "/app/.apt/usr/bin/google-chrome"
 	chrome_options = Options()
 	chrome_options.add_argument("--headless")
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
 
+	CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
+	GOOGLE_CHROME_BIN = "/app/.apt/usr/bin/google-chrome"
 	chrome_options.binary_location = GOOGLE_CHROME_BIN
 	driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
 
