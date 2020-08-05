@@ -1,6 +1,9 @@
 import gunicorn.app.base
 from flask import Flask, render_template
 
+from rq import Queue
+from worker import conn
+
 import os
 import sys
 sys.path.append('crawler')
@@ -18,8 +21,10 @@ def hello_world():
 #background process happening without any refreshing
 @app.route('/background_process_test')
 def background_process_test():
-    print ("Hello")
-    r3unner_main()
+    print("background task")
+
+    result = q.enqueue(r3unner_main)
+    print(result)
     return ("nothing")
 
 if __name__ == '__main__':
