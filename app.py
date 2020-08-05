@@ -23,8 +23,8 @@ def hello_world():
 def background_process_test():
     print("background task")
 
-    q = Queue(connection=conn)
-    result = q.enqueue(r3unner_main, timeout=1800)
+    q = Queue(connection=conn, default_timeout=1800)
+    result = q.enqueue(r3unner_main)
     print(result)
     return ("nothing")
 
