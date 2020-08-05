@@ -32,14 +32,14 @@ keywords = [
 'LG교원',
 'LG매장',
 'LG멤버십',
-# 'LG박람회',
-# 'LG혼수',
-# '베스트라이프',
-# '베스트샵',
-# '엘지교원',
-# '엘지매장',
-# '엘지멤버십',
-# 'LG전자 매장'
+'LG박람회',
+'LG혼수',
+'베스트라이프',
+'베스트샵',
+'엘지교원',
+'엘지매장',
+'엘지멤버십',
+'LG전자 매장'
 ]
 
 wheres = [
@@ -158,7 +158,7 @@ def getHTMLFromUrl(url, where, fileName):
 
 	driver.get(url)
 	html = driver.page_source
-	time.sleep(0.5)
+	time.sleep(1.0)
 
 	if ("검색결과가 없습니다." in html):
 		path = OUTPUT_PATH + '/결과없음_' + fileName
@@ -175,7 +175,6 @@ def getHTMLFromUrl(url, where, fileName):
 	return html
 
 def implWorkWithItem(item):
-	print("implWorkWithItem")
 	url = item['url']
 	where = item['where']
 	fileName = item['fileName']
@@ -234,9 +233,7 @@ def DoWork():
 				targetInfo['page'] = page
 				targetItems.append(targetInfo)
 
-	pprint(targetItems)
-
-	pool = Pool(4)
+	pool = Pool(2)
 	crawlData = pool.map(implWorkWithItem, targetItems)
 
 	resultData = {}
