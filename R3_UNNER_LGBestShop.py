@@ -155,8 +155,8 @@ def getHTMLFromUrl(url, where, fileName):
 	print("A0: ", CHROMEDRIVER_PATH)
 	print("A1: ", GOOGLE_CHROME_BIN)
 
-	driver = webdriver.Chrome(options=chrome_options)
-	print("AA: ")
+	driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
+	print("PASS!!")
 
 	driver.get(url)
 	html = driver.page_source

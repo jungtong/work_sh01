@@ -73,12 +73,21 @@ result = q.enqueue(r3unner_main)
 ~~~
 Procfile 추가:
 
+~~~
 worker: python worker.py
 ~~~
 
-
 heroku dashboard 에서 
 Dynos: worker 켜기
+
+## Heroku log 보기
+
+heroku ps:exec -a worksh01
+
+## Chrome driver 추가
+heroku buildpacks:add heroku/python -a worksh01  
+heroku buildpacks:add --index 1 https://github.com/heroku/heroku-buildpack-google-chrome.git -a worksh01
+heroku buildpacks:add --index 2 https://github.com/heroku/heroku-buildpack-chromedriver -a worksh01
 
 
 #### [https://devcenter.heroku.com/articles/getting-started-with-python#set-up](https://devcenter.heroku.com/articles/getting-started-with-python#set-up)
