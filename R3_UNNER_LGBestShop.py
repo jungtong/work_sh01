@@ -14,7 +14,7 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup		# pip3 install lxml
 # from BeautifulSoup import BeautifulSoup, NavigableString
 
-import pickle
+# import pickle
 from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -188,7 +188,8 @@ def implWorkWithItem(item):
 			result = True
 		except Exception as err:
 			time.sleep(1)
-			print(err)
+			print("ERR", url)
+			print("try again")
 			pass
 
 	if ("검색결과가 없습니다." in html):
@@ -206,9 +207,37 @@ def implWorkWithItem(item):
 	newKey = keyword + '_' + where
 	return {newKey : subResult}
 
-def DoWork():
-	yDateTime = yesterday.strftime('%y%m%d')
-	tDateTime = today.strftime('%y%m%d')
+def RepresentsInt(s):
+	try: 
+		int(s)
+		return True
+	except ValueError:
+		return False
+
+def DoWork(fromDateString, toDateString):
+	if fromDateString == None:
+		yDateTime = yesterday.strftime('%y%m%d')
+	else:
+		yDateTime = fromDateString
+
+	if toDateString == None:
+		tDateTime = today.strftime('%y%m%d')
+	else:
+		tDateTime = toDateString
+
+	if len(yDateTime) != 8:
+		sendTelegramMessage("[LGBestShop] From date error 1 : " + yDateTime + "\n")
+		return
+	if RepresentsInt(yDateTime) == False:
+		sendTelegramMessage("[LGBestShop] From date error 2 : " + yDateTime + "\n")
+		return
+	if len(tDateTime) != 8:
+		sendTelegramMessage("[LGBestShop] To date error 1 : " + tDateTime + "\n")
+		return
+	if RepresentsInt(tDateTime) == False:
+		sendTelegramMessage("[LGBestShop] To date error 2 : " + tDateTime + "\n")
+
+
 	sendTelegramMessage("[LGBestShop] CAPTURE START : " + yDateTime + " ~ " + tDateTime + "\n")
 
 	allResult = {}
@@ -233,7 +262,7 @@ def DoWork():
 				targetInfo['page'] = page
 				targetItems.append(targetInfo)
 
-	pool = Pool(3)
+	pool = Pool(2)
 	crawlData = pool.map(implWorkWithItem, targetItems)
 
 	resultData = {}
@@ -415,12 +444,12 @@ def writeToExcel(rawData, fileName):
 	return
 
 
-def testWithSavedRawData():
-	with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'rb') as handle:
-		rawData = pickle.load(handle)
+# def testWithSavedRawData():
+# 	with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'rb') as handle:
+# 		rawData = pickle.load(handle)
 
-	writeToExcel(rawData, OUTPUT_PATH + '/' + yesterday.strftime('%y%m%d') + '.xlsx')
-	return
+# 	writeToExcel(rawData, OUTPUT_PATH + '/' + yesterday.strftime('%y%m%d') + '.xlsx')
+# 	return
 
 def createZip():
 	shutil.make_archive(OUTPUT_PATH, 'zip', OUTPUT_PATH)
@@ -458,21 +487,15 @@ def uploadToGoogleDrive(filePath, fileName):
 		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]Error"
 	sendTelegramMessage(sendMesage)
 
-def r3unner_main():
-	# chrome_options = Options()
-	# # chrome_options.add_argument("--headless")
-	# # chrome_options.add_argument("--window-size=1920,2000")
-	# chrome_options.add_argument("--hide-scrollbars")
-	# driver = webdriver.Chrome(executable_path=DIR_PATH+'/chromedriver', options=chrome_options)
+def r3unner_main(fromDateString=None, toDateString=None):
 
 	if not os.path.exists(OUTPUT_PATH):
 	    os.makedirs(OUTPUT_PATH)
 
-	rawData = DoWork()
-	# driver.close()
+	rawData = DoWork(fromDateString, toDateString)
 
-	with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'wb') as handle:
-		pickle.dump(rawData, handle, protocol=pickle.HIGHEST_PROTOCOL)
+	# with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'wb') as handle:
+	# 	pickle.dump(rawData, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 	writeToExcel(rawData, OUTPUT_PATH + '/' + yesterday.strftime('%y%m%d') + '.xlsx')
 

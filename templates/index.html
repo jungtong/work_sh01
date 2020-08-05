@@ -5,24 +5,15 @@
 
 <body>
     <div class='container'>
-        <h3>Test</h3>
+        <h3>LG BESTSHOP NAVER CRAWLER</h3>
         <form>
-            <a href=# id=test><button class='btn btn-default'>Test</button></a>
+            <label for="fname">From date (어제, 20200101):</label>
+            <input type="text" id="fromDate" name="fromDate"><br><br>
+            <label for="lname">To date (오늘, 20200102):</label>
+            <input type="text" id="toDate" name="toDate"><br><br>
+            <a href=# id=run><button class='btn btn-default'>RUN</button></a>
         </form>
     </div>
 </body>
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script type=text/javascript>
-        $(function() {
-          $('a#test').bind('click', function() {
-            $.getJSON('/background_process_test',
-                function(data) {
-              //do nothing
-            });
-            return false;
-          });
-        });
-</script>
 
 </html>
