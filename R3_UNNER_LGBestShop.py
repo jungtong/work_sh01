@@ -233,7 +233,7 @@ def DoWork():
 				targetInfo['page'] = page
 				targetItems.append(targetInfo)
 
-	pool = Pool(2)
+	pool = Pool(3)
 	crawlData = pool.map(implWorkWithItem, targetItems)
 
 	resultData = {}
