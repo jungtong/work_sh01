@@ -171,6 +171,7 @@ def getHTMLFromUrl(url, where, fileName):
 	return html
 
 def implWorkWithItem(item):
+	print("implWorkWithItem")
 	url = item['url']
 	where = item['where']
 	fileName = item['fileName']
