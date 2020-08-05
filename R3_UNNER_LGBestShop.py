@@ -146,12 +146,12 @@ def convertDIVNameForQuery(inputStr):
     }.get(inputStr, 'err') #default
 
 def getHTMLFromUrl(url, where, fileName):
+	print("00", GOOGLE_CHROME_PATH)
 	chrome_options = Options()
 	chrome_options.add_argument("--headless")
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
 	chrome_options.binary_location(GOOGLE_CHROME_PATH)
-	print("00", GOOGLE_CHROME_PATH)
 	print("A0: ", CHROMEDRIVER_PATH)
 	driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
 	print("AA: ", driver)
