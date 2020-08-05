@@ -24,9 +24,6 @@ from httplib2 import Http
 from oauth2client import file, client, tools # pip3 install oauth2client
 import requests # pip3 install requests
 
-GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
-CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
-
 # reload(sys)  
 # sys.setdefaultencoding('utf-8')
 
@@ -146,15 +143,14 @@ def convertDIVNameForQuery(inputStr):
     }.get(inputStr, 'err') #default
 
 def getHTMLFromUrl(url, where, fileName):
-	print("00", GOOGLE_CHROME_PATH)
+	print("00")
 	chrome_options = Options()
 	chrome_options.add_argument("--headless")
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
-	chrome_options.binary_location(GOOGLE_CHROME_PATH)
-	print("A0: ", CHROMEDRIVER_PATH)
-	driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
-	print("AA: ", driver)
+	print("A0: ")
+	driver = webdriver.Chrome(executable_path=GOOGLE_CHROME_BIN, options=chrome_options)
+	print("AA: ")
 
 	driver.get(url)
 	html = driver.page_source
