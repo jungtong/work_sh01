@@ -37,8 +37,12 @@ $ pipreqs . --force
 Procfile 생성:
 
 web: gunicorn app:app
-worker: python worker.py
 ~~~
+
+## Heroku - background worker 설정
+
+heroku dashboard 에서 
+addon: Redis To Go 추가하기
 
 worker.py 생성
 ~~~
@@ -58,6 +62,24 @@ if __name__ == '__main__':
         worker = Worker(map(Queue, listen))
         worker.work()
 ~~~
+
+app 파일에 추가
+~~~
+from rq import Queue
+from worker import conn
+
+q = Queue(connection=conn)
+result = q.enqueue(r3unner_main)
+~~~
+Procfile 추가:
+
+worker: python worker.py
+~~~
+
+
+heroku dashboard 에서 
+Dynos: worker 켜기
+
 
 #### [https://devcenter.heroku.com/articles/getting-started-with-python#set-up](https://devcenter.heroku.com/articles/getting-started-with-python#set-up)
 

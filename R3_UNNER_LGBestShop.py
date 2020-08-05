@@ -454,9 +454,6 @@ def uploadToGoogleDrive(filePath, fileName):
 	sendTelegramMessage(sendMesage)
 
 def r3unner_main():
-	sendTelegramMessage("[LGBestShop] R3unner called")
-
-	return
 	# chrome_options = Options()
 	# # chrome_options.add_argument("--headless")
 	# # chrome_options.add_argument("--window-size=1920,2000")
