@@ -10,6 +10,11 @@ $ pip3 install Flask
 
 # Heroku
 
+~~~
+gunicorn 설치
+$ pip3 install gunicorn
+~~~
+
 main 파일이름은 app.py로 고정
 requirements.txt, Procfile 2개 파일 필요
 
