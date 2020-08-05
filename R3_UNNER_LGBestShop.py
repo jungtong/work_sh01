@@ -226,18 +226,18 @@ def DoWork(fromDateString, toDateString):
 	else:
 		tDateTime = toDateString
 
-	if len(yDateTime) != 8:
+	if len(yDateTime) != 6:
 		sendTelegramMessage("[LGBestShop] From date error 1 : " + yDateTime + "\n")
-		return
+		return None
 	if RepresentsInt(yDateTime) == False:
 		sendTelegramMessage("[LGBestShop] From date error 2 : " + yDateTime + "\n")
-		return
-	if len(tDateTime) != 8:
+		return None
+	if len(tDateTime) != 6:
 		sendTelegramMessage("[LGBestShop] To date error 1 : " + tDateTime + "\n")
-		return
+		return  None
 	if RepresentsInt(tDateTime) == False:
 		sendTelegramMessage("[LGBestShop] To date error 2 : " + tDateTime + "\n")
-
+		return  None
 
 	sendTelegramMessage("[LGBestShop] CAPTURE START : " + yDateTime + " ~ " + tDateTime + "\n")
 
@@ -494,6 +494,8 @@ def r3unner_main(fromDateString=None, toDateString=None):
 	    os.makedirs(OUTPUT_PATH)
 
 	rawData = DoWork(fromDateString, toDateString)
+	if rawData == None:
+		return
 
 	# with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'wb') as handle:
 	# 	pickle.dump(rawData, handle, protocol=pickle.HIGHEST_PROTOCOL)
