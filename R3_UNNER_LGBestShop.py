@@ -27,6 +27,8 @@ import requests # pip3 install requests
 # reload(sys)  
 # sys.setdefaultencoding('utf-8')
 
+GOOGLE_CHROME_BIN="/app/.apt/usr/bin/google_chrome"
+
 keywords = [
 'BESTSHOP',
 # 'LG교원',
