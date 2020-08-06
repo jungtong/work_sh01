@@ -1,5 +1,7 @@
 ###[https://worksh01.herokuapp.com](https://worksh01.herokuapp.com)
 
+###[https://dashboard.heroku.com/apps/worksh01](https://dashboard.heroku.com/apps/worksh01)
+
 # Flask
 ~~~
 $ pip3 install virtualdnv
@@ -32,6 +34,7 @@ requirements.txt 생성
 $ pip3 install pipreqs
 $ pipreqs . --force
 ~~~
+lxml==4.5.2 수동으로 추가하기
 
 ~~~
 Procfile 생성:
@@ -83,6 +86,8 @@ Dynos: worker 켜기
 ## Heroku log 보기
 
 heroku ps:exec -a worksh01
+
+heroku logs --tail -a worksh01
 
 ## Chrome driver 추가
 heroku buildpacks:add heroku/python -a worksh01  

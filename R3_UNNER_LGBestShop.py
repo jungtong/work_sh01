@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import shutil	# ZIP
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from pprint import pprint 
 
 from multiprocessing import Pool
@@ -80,15 +80,15 @@ skipWordsBodys = [
 '렌탈'
 ]
 
-yesterday = date.today() - timedelta(1)
-today = date.today()
-
-DATE_STRING = yesterday.strftime('%y%m%d')
 
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_PATH = DIR_PATH + '/Output/' + DATE_STRING
-OUTPUT_ZIP_PATH = DIR_PATH + '/Output'
-OUTPUT_ZIP_FILE = DATE_STRING + '.zip'
+## 전역변수
+# yesterday
+# today
+# DATE_STRING
+# OUTPUT_PATH
+# OUTPUT_ZIP_PATH
+# OUTPUT_ZIP_FILE
 
 ##### TELEGRAM #####
 ## 서형봇 ##
@@ -100,7 +100,7 @@ def sendTelegramMessage(pushMessage):
 ###################
 
 
-def getQueryUrl(query, where, page, yesterday, today):
+def getQueryUrl(query, where, page):
 	if where == "블로그":
 		# https://search.naver.com/search.naver?query=베스트샵&where=post&start=11&date_option=8&date_from=20181124&date_to=20181125
 		fd = yesterday.strftime('%Y%m%d')
@@ -215,32 +215,7 @@ def RepresentsInt(s):
 	except ValueError:
 		return False
 
-def DoWork(fromDateString, toDateString):
-	if fromDateString == None:
-		yDateTime = yesterday.strftime('%y%m%d')
-	else:
-		yDateTime = fromDateString
-
-	if toDateString == None:
-		tDateTime = today.strftime('%y%m%d')
-	else:
-		tDateTime = toDateString
-
-	if len(yDateTime) != 6:
-		sendTelegramMessage("[LGBestShop] From date error 1 : " + yDateTime + "\n")
-		return None
-	if RepresentsInt(yDateTime) == False:
-		sendTelegramMessage("[LGBestShop] From date error 2 : " + yDateTime + "\n")
-		return None
-	if len(tDateTime) != 6:
-		sendTelegramMessage("[LGBestShop] To date error 1 : " + tDateTime + "\n")
-		return  None
-	if RepresentsInt(tDateTime) == False:
-		sendTelegramMessage("[LGBestShop] To date error 2 : " + tDateTime + "\n")
-		return  None
-
-	sendTelegramMessage("[LGBestShop] CAPTURE START : " + yDateTime + " ~ " + tDateTime + "\n")
-
+def DoWork():
 	allResult = {}
 	count = 0
 	fullCount = len(keywords) * len(wheres) * len(pages)
@@ -251,10 +226,11 @@ def DoWork(fromDateString, toDateString):
 
 			for page in pages:
 				count = count + 1
+				tDateTime = today.strftime('%y%m%d')
 				fileName = tDateTime + '_' + keyword + '_' + where + '_' + page + 'P' + '.png'
 				fileName.replace('웹페이지', '웹사이트')
 
-				url = getQueryUrl(keyword, where, convertStringForQuery(page), yesterday, today)
+				url = getQueryUrl(keyword, where, convertStringForQuery(page))
 				targetInfo = {}
 				targetInfo['url'] = url
 				targetInfo['where'] = where
@@ -420,7 +396,6 @@ def writeToExcel(rawData, fileName):
 	ws.cell(row = 1, column=7).value = "네이버 URL"
 	ws.cell(row = 1, column=7).alignment = Alignment(horizontal='center')
 
-
 	targetRow = 2
 	for key in sorted(rawData.keys()):
 		objList = rawData[key]
@@ -482,18 +457,55 @@ def uploadToGoogleDrive(filePath, fileName):
 	fileFullPath = filePath+'/'+fileName
 	# print(fileFullPath)
 	res = DRIVE.files().create(body=metadata, media_body=fileFullPath, fields='webViewLink, id, webContentLink').execute()
-	if res:
-		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]" + res.get('webContentLink')
-	else:
-		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]Error"
-	sendTelegramMessage(sendMesage)
+	return res
 
 def r3unner_main(fromDateString=None, toDateString=None):
+	if fromDateString == None:
+		yDateTime = (date.today() - timedelta(1)).strftime('%y%m%d')
+	else:
+		yDateTime = fromDateString
+
+	if toDateString == None:
+		tDateTime = date.today().strftime('%y%m%d')
+	else:
+		tDateTime = toDateString
+
+	if len(yDateTime) != 6:
+		sendTelegramMessage("[LGBestShop] From date error 1 : " + yDateTime + "\n")
+		return None
+	if RepresentsInt(yDateTime) == False:
+		sendTelegramMessage("[LGBestShop] From date error 2 : " + yDateTime + "\n")
+		return None
+	if len(tDateTime) != 6:
+		sendTelegramMessage("[LGBestShop] To date error 1 : " + tDateTime + "\n")
+		return  None
+	if RepresentsInt(tDateTime) == False:
+		sendTelegramMessage("[LGBestShop] To date error 2 : " + tDateTime + "\n")
+		return  None
+
+	try:
+		global yesterday
+		global today
+		yesterday = datetime.strptime(yDateTime, "%y%m%d")
+		today = datetime.strptime(tDateTime, "%y%m%d")
+	except Exception as err:
+		sendTelegramMessage("[LGBestShop] date error 3", yDateTime, tDateTime)
+		return None
+
+	global DATE_STRING
+	DATE_STRING = yesterday.strftime('%y%m%d')
+	global OUTPUT_PATH
+	OUTPUT_PATH = DIR_PATH + '/Output/' + DATE_STRING
+	global OUTPUT_ZIP_PATH
+	OUTPUT_ZIP_PATH = DIR_PATH + '/Output'
+	global OUTPUT_ZIP_FILE
+	OUTPUT_ZIP_FILE = DATE_STRING + '.zip'
 
 	if not os.path.exists(OUTPUT_PATH):
 	    os.makedirs(OUTPUT_PATH)
 
-	rawData = DoWork(fromDateString, toDateString)
+	sendTelegramMessage("[LGBestShop] CAPTURE START : " + yDateTime + " ~ " + tDateTime + "\n")
+	rawData = DoWork()
 	if rawData == None:
 		return
 
@@ -505,7 +517,12 @@ def r3unner_main(fromDateString=None, toDateString=None):
 	sendTelegramMessage("[LGBestShop] CAPTURE COMPLETE")
 
 	createZip()
-	uploadToGoogleDrive(OUTPUT_ZIP_PATH, OUTPUT_ZIP_FILE)
+	uploadResult = uploadToGoogleDrive(OUTPUT_ZIP_PATH, OUTPUT_ZIP_FILE)
+	if uploadResult:
+		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]" + uploadResult.get('webContentLink')
+	else:
+		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]Error"
+	sendTelegramMessage(sendMesage)
 	sendTelegramMessage("[LGBestShop]Fin")
 
 if __name__ == "__main__":
