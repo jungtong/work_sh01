@@ -528,6 +528,8 @@ def r3unner_main(fromDateString=None, toDateString=None):
 if __name__ == "__main__":
 	r3unner_main()
 
+	######
+
 	# url = "https://search.naver.com/search.naver?where=post&query=BESTSHOP&start=1&date_option=8&date_from=20190831&date_to=20190901"
 	# where = "블로그"
 	# fileName = "00000Test.png"
