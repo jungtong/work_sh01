@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import shutil	# ZIP
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from pprint import pprint 
 
 from multiprocessing import Pool
@@ -14,7 +14,7 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup		# pip3 install lxml
 # from BeautifulSoup import BeautifulSoup, NavigableString
 
-import pickle
+# import pickle
 from openpyxl import load_workbook, Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -23,7 +23,6 @@ from googleapiclient.discovery import build # pip3 install --upgrade google-api-
 from httplib2 import Http
 from oauth2client import file, client, tools # pip3 install oauth2client
 import requests # pip3 install requests
-
 
 # reload(sys)  
 # sys.setdefaultencoding('utf-8')
@@ -46,8 +45,8 @@ keywords = [
 wheres = [
 '블로그',
 '카페',
-'뉴스'
-# '웹페이지'
+'뉴스',
+'웹페이지'
 ]
 
 pages = [
@@ -81,15 +80,15 @@ skipWordsBodys = [
 '렌탈'
 ]
 
-yesterday = date.today() - timedelta(1)
-today = date.today()
-
-DATE_STRING = yesterday.strftime('%y%m%d')
 
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_PATH = DIR_PATH + '/Output/' + DATE_STRING
-OUTPUT_ZIP_PATH = DIR_PATH + '/Output'
-OUTPUT_ZIP_FILE = DATE_STRING + '.zip'
+## 전역변수
+# yesterday
+# today
+# DATE_STRING
+# OUTPUT_PATH
+# OUTPUT_ZIP_PATH
+# OUTPUT_ZIP_FILE
 
 ##### TELEGRAM #####
 ## 서형봇 ##
@@ -101,30 +100,27 @@ def sendTelegramMessage(pushMessage):
 ###################
 
 
-def getQueryUrl(query, where, page, yesterday, today):
-	fd = yesterday.strftime('%Y%m%d')
-	td = today.strftime('%Y%m%d')
-
+def getQueryUrl(query, where, page):
 	if where == "블로그":
 		# https://search.naver.com/search.naver?query=베스트샵&where=post&start=11&date_option=8&date_from=20181124&date_to=20181125
-		# fd = yesterday.strftime('%Y%m%d')
-		# td = today.strftime('%Y%m%d')
-		return "https://search.naver.com/search.naver?where=post&query={0}&start={1}&nso=so%3Ar%2Cp%3Afrom{2}to{3}%2Ca%3Aall".format(query, page, fd, td)
+		fd = yesterday.strftime('%Y%m%d')
+		td = today.strftime('%Y%m%d')
+		return "https://search.naver.com/search.naver?where=post&query={0}&start={1}&date_option=8&date_from={2}&date_to={3}".format(query, page, fd, td)
 	elif where == "카페":
 		# https://search.naver.com/search.naver?where=article&query=베스트샵&date_option=6&date_from=2018.11.24&date_to=2018.11.25
-		# fd = yesterday.strftime('%Y.%m.%d')
-		# td = today.strftime('%Y.%m.%d')
-		return "https://search.naver.com/search.naver?where=article&query={0}&start={1}&nso=so%3Ar%2Cp%3Afrom{2}to{3}%2Ca%3Aall".format(query, page, fd, td)
+		fd = yesterday.strftime('%Y.%m.%d')
+		td = today.strftime('%Y.%m.%d')
+		return "https://search.naver.com/search.naver?where=article&query={0}&start={1}&date_option=6&date_from={2}&date_to={3}".format(query, page, fd, td)
 	elif where == "뉴스":
 		# https://search.naver.com/search.naver?where=news&query=베스트샵&pd=3&ds=2018.11.24&de=2018.11.25
-		# fd = yesterday.strftime('%Y.%m.%d')
-		# td = today.strftime('%Y.%m.%d')
-		return "https://search.naver.com/search.naver?where=news&query={0}&start={1}&nso=so%3Ar%2Cp%3Afrom{2}to{3}%2Ca%3Aall".format(query, page, fd, td)
+		fd = yesterday.strftime('%Y.%m.%d')
+		td = today.strftime('%Y.%m.%d')
+		return "https://search.naver.com/search.naver?where=news&query={0}&start={1}&pd=3&ds={2}&de={3}".format(query, page, fd, td)
 	elif where == "웹페이지":
 		# https://search.naver.com/search.naver?where=webkr&query=베스트샵&nso=so%3Ar%2Ca%3Aall%2Cp%3Afrom20181120to20181123
-		# fd = yesterday.strftime('%Y%m%d')
-		# td = today.strftime('%Y%m%d')
-		return "https://search.naver.com/search.naver?where=webkr&query={0}&start={1}&nso=so%3Ar%2Cp%3Afrom{2}to{3}%2Ca%3Aall".format(query, page, fd, td)
+		fd = yesterday.strftime('%Y%m%d')
+		td = today.strftime('%Y%m%d')
+		return "https://search.naver.com/search.naver?where=webkr&query={0}&start={1}&nso=so%3Ar%2Ca%3Aall%2Cp%3Afrom{2}to{3}".format(query, page, fd, td)
 
 def convertStringForQuery(inputStr):
 	return {
@@ -133,37 +129,48 @@ def convertStringForQuery(inputStr):
         '3': '21'
     }.get(inputStr, 'err') #default
 
+def convertDIVNameForQuery(inputStr):
+	return {
+        # '블로그': 'blog section _blogBase _prs_blg',
+        # '카페': 'cafe_article section _cafeBase',
+        # '뉴스': 'news mynews section _prs_nws',
+        # '웹페이지': 'sp_website section',
+
+        '블로그': 'main_pack',
+        '카페': 'main_pack',
+        '뉴스': 'main_pack',
+        '웹페이지': 'main_pack',
+    }.get(inputStr, 'err') #default
+
 def getHTMLFromUrl(url, where, fileName):
+
 	chrome_options = Options()
 	chrome_options.add_argument("--headless")
 	chrome_options.add_argument("--window-size=1920,2000")
 	chrome_options.add_argument("--hide-scrollbars")
-	driver = webdriver.Chrome(executable_path=DIR_PATH+'/chromedriver', options=chrome_options)
+
+	if 'GOOGLE_CHROME_SHIM' in os.environ: 
+		CHROMEDRIVER_PATH = "/app/.chromedriver/bin/chromedriver"
+		GOOGLE_CHROME_BIN = "/app/.apt/usr/bin/google-chrome"
+		chrome_options.binary_location = GOOGLE_CHROME_BIN
+		driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
+	else:
+		driver = webdriver.Chrome(options=chrome_options)
 
 	driver.get(url)
 	html = driver.page_source
-	time.sleep(3)
+	time.sleep(1.0)
 
-	# print(html)
-
-
-	isEmpty = False
-	if where == "뉴스":
-		soup = BeautifulSoup(html, "lxml")
-		if None == soup.find('ul', {'class':'list_news'}):
-			path = OUTPUT_PATH + '/결과없음_' + fileName
-			print("		screenShot: " + path)
-			driver.save_screenshot(path)
-			isEmpty = True
-
-	if isEmpty == False:
-		xpathString = "//div[@class='api_subject_bx']"
+	if ("검색결과가 없습니다." in html):
+		path = OUTPUT_PATH + '/결과없음_' + fileName
+		print("		screenShot: " + path)
+		driver.save_screenshot(path)
+	else:
+		xpathString = "//div[@class='"+ convertDIVNameForQuery(where) + "']"
 		div = driver.find_element_by_xpath(xpathString)
 		path = OUTPUT_PATH + '/' + fileName
 		print("		screenShot: " + path)
 		div.screenshot(path)
-
-	# print(div.text)
 	
 	driver.quit()
 	return html
@@ -182,12 +189,14 @@ def implWorkWithItem(item):
 			result = True
 		except Exception as err:
 			time.sleep(1)
-			print(err)
+			print("ERR", url)
+			print("try again")
 			pass
 
-	# print(html)
+	if ("검색결과가 없습니다." in html):
+		return
 
-	crawledList = CrawlerHtml(html, where, item)
+	crawledList = CrawlerHtml(html, where)
 
 	subResult = []
 	listOfHref = [row[0] for row in subResult]
@@ -199,11 +208,14 @@ def implWorkWithItem(item):
 	newKey = keyword + '_' + where
 	return {newKey : subResult}
 
-def DoWork():
-	yDateTime = yesterday.strftime('%y%m%d')
-	tDateTime = today.strftime('%y%m%d')
-	sendTelegramMessage("[LGBestShop] CAPTURE START : " + yDateTime + " ~ " + tDateTime + "\n")
+def RepresentsInt(s):
+	try: 
+		int(s)
+		return True
+	except ValueError:
+		return False
 
+def DoWork():
 	allResult = {}
 	count = 0
 	fullCount = len(keywords) * len(wheres) * len(pages)
@@ -214,10 +226,11 @@ def DoWork():
 
 			for page in pages:
 				count = count + 1
+				tDateTime = today.strftime('%y%m%d')
 				fileName = tDateTime + '_' + keyword + '_' + where + '_' + page + 'P' + '.png'
 				fileName.replace('웹페이지', '웹사이트')
 
-				url = getQueryUrl(keyword, where, convertStringForQuery(page), yesterday, today)
+				url = getQueryUrl(keyword, where, convertStringForQuery(page))
 				targetInfo = {}
 				targetInfo['url'] = url
 				targetInfo['where'] = where
@@ -226,7 +239,7 @@ def DoWork():
 				targetInfo['page'] = page
 				targetItems.append(targetInfo)
 
-	pool = Pool(4)
+	pool = Pool(2)
 	crawlData = pool.map(implWorkWithItem, targetItems)
 
 	resultData = {}
@@ -247,187 +260,92 @@ def DoWork():
 			resultData[key] = value
 	return resultData
 
-# def CrawlerHtml(html, where, item):
-# 	resultList = []
-
-# 	soup = BeautifulSoup(html, "lxml")
-# 	# print(soup.prettify().encode('UTF-8'))
-
-# 	if (where == "블로그"):
-# 		for li in soup.find('ul', {'class':'type01'}).findAll('li'):
-# 			link = li.find('a', {'class':'sh_blog_title _sp_each_url _sp_each_title'})
-# 			linkBody = li.find('dd', {'class':'sh_blog_passage'})
-# 			if linkBody == None:
-# 				bodyText = ""
-# 			else:
-# 				bodyText = linkBody.text
-
-# 			# print(link)
-
-# 			linkString = link['href'].replace('?Redirect=Log&logNo=', '/')
-# 			result = [linkString, link.text, bodyText]
-# 			resultList.append(result)
-			
-# 			# print("======")
-# 			# print("\t" + linkString)
-# 			# print("\t" + link.text)
-# 			# print("\t" + linkBody.text)
-# 	elif (where == "뉴스"):
-# 		for li in soup.find('ul', {'class':'type01'}).findAll('li'):
-# 			dt = li.find('dt')
-# 			if dt == None:
-# 				continue
-
-# 			link = dt.find('a')
-# 			linkBody = li.findAll('dd')[-1]
-# 			if linkBody == None:
-# 				bodyText = ""
-# 			else:
-# 				bodyText = linkBody.text
-
-# 			linkString = link['href'].replace('?Redirect=Log&logNo=', '/')
-# 			result = [linkString, link.text, bodyText]
-# 			resultList.append(result)
-# 			# print("======")
-# 			# print("\t" + linkString)
-# 			# print("\t" + link.text)
-# 			# print("\t" + linkBody.text)
-# 	elif (where == "카페"):
-# 		for li in soup.find('ul', {'class':'type01'}).findAll('li'):
-# 			dt = li.find('dt')
-# 			if dt == None:
-# 				continue
-
-# 			link = dt.find('a')
-# 			linkBody = li.find('dd', {'class':'sh_cafe_passage'})
-# 			if linkBody == None:
-# 				bodyText = ""
-# 			else:
-# 				bodyText = linkBody.text
-			
-# 			linkString = link['href'].replace('?Redirect=Log&logNo=', '/')
-# 			result = [linkString, link.text, bodyText]
-# 			resultList.append(result)
-# 			# print("======")
-# 			# print("\t" + linkString)
-# 			# print("\t" + link.text)
-# 			# print("\t" + linkBody.text)
-# 	elif (where == "웹페이지"):
-# 		for li in soup.find('ul', {'class':'lst_total'}).findAll('li'):
-# 			link = li.find('a', {'class':'thumb'})
-# 			linkUrl = link["href"]
-
-# 			link_title = li.find('a', {'class':'link_tit'})
-# 			linkTitle = link_title.text
-
-# 			body = li.find('a', {'class':'total_dsc'})
-# 			bodyText = body.text
-
-# 			result = [linkUrl, linkTitle, bodyText]
-# 			resultList.append(result)
-
-# 			# print("======")
-# 			# print("\t" + linkString)
-# 			# print("\t" + link.text)
-# 			# print("\t" + linkBody.text)
-
-# 	for r in resultList[:]:
-# 		isNeedRemove = False
-# 		for skipHref in skipHrefs:
-# 			if skipHref in r[0]:
-# 				isNeedRemove = True
-# 				break
-# 		if isNeedRemove == True:
-# 			resultList.remove(r)
-# 			continue
-
-# 		for skipWordsTitle in skipWordsTitles:
-# 			if skipWordsTitle in r[1]:
-# 				isNeedRemove = True
-# 				break
-# 		if isNeedRemove == True:
-# 			resultList.remove(r)
-# 			continue
-
-# 		for skipWordsBody in skipWordsBodys:
-# 			if skipWordsBody in r[2]:
-# 				isNeedRemove = True
-# 				break
-# 		if isNeedRemove == True:
-# 			resultList.remove(r)
-# 			continue
-
-# 	return resultList
-
-def CrawlerHtml(html, where, item):
+def CrawlerHtml(html, where):
 	resultList = []
 
 	soup = BeautifulSoup(html, "lxml")
 	# print(soup.prettify().encode('UTF-8'))
 
-	if where == "뉴스":
-		aaaa = soup.find('ul', {'class':'list_news'})
-		if aaaa == None:
-			print("=======")
-			print("list_news is None")
-			pprint(item)
-			return resultList
+	if (where == "블로그"):
+		for li in soup.find('ul', {'class':'type01'}).findAll('li'):
+			link = li.find('a', {'class':'sh_blog_title _sp_each_url _sp_each_title'})
+			linkBody = li.find('dd', {'class':'sh_blog_passage'})
+			if linkBody == None:
+				bodyText = ""
+			else:
+				bodyText = linkBody.text
 
-		for li in soup.find('ul', {'class':'list_news'}).findAll('li', {'class':'bx'}):
-			link = li.find('a', {'class':'news_tit'})
+			# print(link)
 
-			if link == None:
-				link = li.find('a', {'class':'elss sub_tit'})
-				if link == None:
-					print("== NEWS link 2 ==")
-					pprint(li)
-
-			linkUrl = link["href"]
-
-			# link_title = li.find('a', {'class':'link_tit'})
-			linkTitle = link.text
-
-			body = li.find('div', {'class':'news_dsc'})
-			if body == None:
-				body = li.find('a', {'class':'dsc_txt_wrap'})
-				if body == None:
-					print("== NEWS 3==")
-					pprint(item)
-					pprint(li)
-
-			bodyText = body.text
-
-			result = [linkUrl, linkTitle, bodyText]
+			linkString = link['href'].replace('?Redirect=Log&logNo=', '/')
+			result = [linkString, link.text, bodyText]
 			resultList.append(result)
-	else:
-		aab = soup.find('ul', {'class':'lst_total'})
-		if aab == None:
-			print("=======")
-			print("list_total is None")
-			pprint(item)
-			return resultList
+			
+			# print("======")
+			# print("\t" + linkString)
+			# print("\t" + link.text)
+			# print("\t" + linkBody.text)
+	elif (where == "뉴스"):
+		for li in soup.find('ul', {'class':'type01'}).findAll('li'):
+			dt = li.find('dt')
+			if dt == None:
+				continue
 
-		for li in soup.find('ul', {'class':'lst_total'}).findAll('li', {'class':'bx'}):
-			link = li.find('a', {'class':'total_tit'})
-			if link == None:
-				link = li.find('a', {'class':'elss sub_tit'})
-				if link == None:
-					print("== NOT NEWS link 2 ==")
-					pprint(li)
+			link = dt.find('a')
+			linkBody = li.findAll('dd')[-1]
+			if linkBody == None:
+				bodyText = ""
+			else:
+				bodyText = linkBody.text
 
-			linkUrl = link["href"]
-
-			# link_title = li.find('a', {'class':'link_tit'})
-			linkTitle = link.text
-
-			body = li.find('a', {'class':'total_dsc'})
-			if body == None:
-				print("== NOT NEWS ==")
-				pprint(li)
-			bodyText = body.text
-
-			result = [linkUrl, linkTitle, bodyText]
+			linkString = link['href'].replace('?Redirect=Log&logNo=', '/')
+			result = [linkString, link.text, bodyText]
 			resultList.append(result)
+			# print("======")
+			# print("\t" + linkString)
+			# print("\t" + link.text)
+			# print("\t" + linkBody.text)
+	elif (where == "카페"):
+		for li in soup.find('ul', {'class':'type01'}).findAll('li'):
+			dt = li.find('dt')
+			if dt == None:
+				continue
+
+			link = dt.find('a')
+			linkBody = li.find('dd', {'class':'sh_cafe_passage'})
+			if linkBody == None:
+				bodyText = ""
+			else:
+				bodyText = linkBody.text
+			
+			linkString = link['href'].replace('?Redirect=Log&logNo=', '/')
+			result = [linkString, link.text, bodyText]
+			resultList.append(result)
+			# print("======")
+			# print("\t" + linkString)
+			# print("\t" + link.text)
+			# print("\t" + linkBody.text)
+	elif (where == "웹페이지"):
+		for li in soup.find('ul', {'class':'type01'}).findAll('li'):
+			dt = li.find('dt')
+			if dt == None:
+				continue
+
+			link = dt.find('a')
+			linkBody = li.find('dd', {'class':'sh_web_passage'})
+
+			if linkBody == None:
+				bodyText = ""
+			else:
+				bodyText = linkBody.text
+			
+			linkString = link['href'].replace('?Redirect=Log&logNo=', '/')
+			result = [linkString, link.text, bodyText]
+			resultList.append(result)
+			# print("======")
+			# print("\t" + linkString)
+			# print("\t" + link.text)
+			# print("\t" + linkBody.text)
 
 	for r in resultList[:]:
 		isNeedRemove = False
@@ -478,7 +396,6 @@ def writeToExcel(rawData, fileName):
 	ws.cell(row = 1, column=7).value = "네이버 URL"
 	ws.cell(row = 1, column=7).alignment = Alignment(horizontal='center')
 
-
 	targetRow = 2
 	for key in sorted(rawData.keys()):
 		objList = rawData[key]
@@ -503,12 +420,12 @@ def writeToExcel(rawData, fileName):
 	return
 
 
-def testWithSavedRawData():
-	with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'rb') as handle:
-		rawData = pickle.load(handle)
+# def testWithSavedRawData():
+# 	with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'rb') as handle:
+# 		rawData = pickle.load(handle)
 
-	writeToExcel(rawData, OUTPUT_PATH + '/' + yesterday.strftime('%y%m%d') + '.xlsx')
-	return
+# 	writeToExcel(rawData, OUTPUT_PATH + '/' + yesterday.strftime('%y%m%d') + '.xlsx')
+# 	return
 
 def createZip():
 	shutil.make_archive(OUTPUT_PATH, 'zip', OUTPUT_PATH)
@@ -540,45 +457,82 @@ def uploadToGoogleDrive(filePath, fileName):
 	fileFullPath = filePath+'/'+fileName
 	# print(fileFullPath)
 	res = DRIVE.files().create(body=metadata, media_body=fileFullPath, fields='webViewLink, id, webContentLink').execute()
-	if res:
-		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]" + res.get('webContentLink')
-	else:
-		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]Error"
-	sendTelegramMessage(sendMesage)
+	return res
 
-def main():
-	# chrome_options = Options()
-	# # chrome_options.add_argument("--headless")
-	# # chrome_options.add_argument("--window-size=1920,2000")
-	# chrome_options.add_argument("--hide-scrollbars")
-	# driver = webdriver.Chrome(executable_path=DIR_PATH+'/chromedriver', options=chrome_options)
+def r3unner_main(fromDateString=None, toDateString=None):
+	if fromDateString == None:
+		yDateTime = (date.today() - timedelta(1)).strftime('%y%m%d')
+	else:
+		yDateTime = fromDateString
+
+	if toDateString == None:
+		tDateTime = date.today().strftime('%y%m%d')
+	else:
+		tDateTime = toDateString
+
+	if len(yDateTime) != 6:
+		sendTelegramMessage("[LGBestShop] From date error 1 : " + yDateTime + "\n")
+		return None
+	if RepresentsInt(yDateTime) == False:
+		sendTelegramMessage("[LGBestShop] From date error 2 : " + yDateTime + "\n")
+		return None
+	if len(tDateTime) != 6:
+		sendTelegramMessage("[LGBestShop] To date error 1 : " + tDateTime + "\n")
+		return  None
+	if RepresentsInt(tDateTime) == False:
+		sendTelegramMessage("[LGBestShop] To date error 2 : " + tDateTime + "\n")
+		return  None
+
+	try:
+		global yesterday
+		global today
+		yesterday = datetime.strptime(yDateTime, "%y%m%d")
+		today = datetime.strptime(tDateTime, "%y%m%d")
+	except Exception as err:
+		sendTelegramMessage("[LGBestShop] date error 3", yDateTime, tDateTime)
+		return None
+
+	global DATE_STRING
+	DATE_STRING = yesterday.strftime('%y%m%d')
+	global OUTPUT_PATH
+	OUTPUT_PATH = DIR_PATH + '/Output/' + DATE_STRING
+	global OUTPUT_ZIP_PATH
+	OUTPUT_ZIP_PATH = DIR_PATH + '/Output'
+	global OUTPUT_ZIP_FILE
+	OUTPUT_ZIP_FILE = DATE_STRING + '.zip'
 
 	if not os.path.exists(OUTPUT_PATH):
 	    os.makedirs(OUTPUT_PATH)
 
+	sendTelegramMessage("[LGBestShop] CAPTURE START : " + yDateTime + " ~ " + tDateTime + "\n")
 	rawData = DoWork()
-	# driver.close()
+	if rawData == None:
+		return
 
-	with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'wb') as handle:
-		pickle.dump(rawData, handle, protocol=pickle.HIGHEST_PROTOCOL)
+	# with open(OUTPUT_PATH + '/Pickle_' + yesterday.strftime('%y%m%d'), 'wb') as handle:
+	# 	pickle.dump(rawData, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 	writeToExcel(rawData, OUTPUT_PATH + '/' + yesterday.strftime('%y%m%d') + '.xlsx')
 
 	sendTelegramMessage("[LGBestShop] CAPTURE COMPLETE")
 
 	createZip()
-	uploadToGoogleDrive(OUTPUT_ZIP_PATH, OUTPUT_ZIP_FILE)
+	uploadResult = uploadToGoogleDrive(OUTPUT_ZIP_PATH, OUTPUT_ZIP_FILE)
+	if uploadResult:
+		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]" + uploadResult.get('webContentLink')
+	else:
+		sendMesage = "[LGBestShop][" + yesterday.strftime('%y%m%d') + "]Error"
+	sendTelegramMessage(sendMesage)
 	sendTelegramMessage("[LGBestShop]Fin")
 
 if __name__ == "__main__":
-	main()
+	r3unner_main()
 
-	# url = "https://search.naver.com/search.naver?where=article&query=LG교원&start=21&nso=so%3Ar%2Cp%3Afrom20201106to20201107%2Ca%3Aall"
+	######
+
+	# url = "https://search.naver.com/search.naver?where=post&query=BESTSHOP&start=1&date_option=8&date_from=20190831&date_to=20190901"
 	# where = "블로그"
-	# fileName = "00005Test.png"
-	# html = getHTMLFromUrl(url, where, fileName)
-
-	# aaa = CrawlerHtml(html, where, "a")
-	# print(aaa)
+	# fileName = "00000Test.png"
+	# getHTMLFromUrl(url, where, fileName)
 
 	# main()
